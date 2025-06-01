@@ -8,6 +8,7 @@ import {
 import { User } from './entities/user.entity';
 import { v4 as uuidv4 } from 'uuid';
 import { UpdatePasswordDto } from './dto/update-password.dto';
+import { isValidUUID } from 'src/utils';
 
 @Injectable()
 export class UserSercvice {
@@ -27,6 +28,10 @@ export class UserSercvice {
   }
 
   getById(id: string) {
+    if (!isValidUUID(id)) {
+      throw new BadRequestException('Invalid user ID format');
+    }
+
     return this.users.find((user) => user.id === id);
   }
 
@@ -51,7 +56,7 @@ export class UserSercvice {
   }
 
   updatePassword(id: string, { oldPassword, newPassword }: UpdatePasswordDto) {
-    if (!this.isValidUUID(id)) {
+    if (!isValidUUID(id)) {
       throw new BadRequestException('Invalid user ID format');
     }
 
@@ -72,7 +77,7 @@ export class UserSercvice {
   }
 
   deleteUser(id: string) {
-    if (!this.isValidUUID(id)) {
+    if (!isValidUUID(id)) {
       throw new BadRequestException('Invalid user ID format');
     }
 
@@ -88,11 +93,5 @@ export class UserSercvice {
   private setUpdateUser(user: User) {
     user.version += 1;
     user.updatedAt = Date.now();
-  }
-
-  private isValidUUID(id: string): boolean {
-    const uuidRegex =
-      /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-    return uuidRegex.test(id);
   }
 }
