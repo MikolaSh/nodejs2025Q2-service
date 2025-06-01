@@ -71,6 +71,20 @@ export class UserSercvice {
     return user;
   }
 
+  deleteUser(id: string) {
+    if (!this.isValidUUID(id)) {
+      throw new BadRequestException('Invalid user ID format');
+    }
+
+    const userIndex = this.users.findIndex((u) => u.id === id);
+
+    if (userIndex === -1) {
+      throw new NotFoundException('User not found');
+    }
+
+    this.users.splice(userIndex, 1);
+  }
+
   private setUpdateUser(user: User) {
     user.version += 1;
     user.updatedAt = Date.now();

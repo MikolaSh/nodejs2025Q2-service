@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
@@ -45,5 +46,11 @@ export class UserController {
     @Body() updatePasswordDto: UpdatePasswordDto,
   ): User {
     return this.userService.updatePassword(id, updatePasswordDto);
+  }
+
+  @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  deleteUser(@Param('id') id: string) {
+    this.userService.deleteUser(id);
   }
 }
