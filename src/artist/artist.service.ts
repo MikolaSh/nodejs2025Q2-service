@@ -1,6 +1,10 @@
 import { isValidUUID } from 'src/utils';
 import { Artist } from './entities/artist.entity';
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
@@ -22,6 +26,12 @@ export class ArtistService {
       throw new BadRequestException('Invalid user ID format');
     }
 
-    return this.artists.find((user) => user.id === id);
+    const artist = this.artists.find((user) => user.id === id);
+
+    if (!artist) {
+      throw new NotFoundException('Artist not found');
+    }
+
+    return artist;
   }
 }

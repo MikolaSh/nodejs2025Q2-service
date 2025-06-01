@@ -32,7 +32,13 @@ export class UserSercvice {
       throw new BadRequestException('Invalid user ID format');
     }
 
-    return this.users.find((user) => user.id === id);
+    const user = this.users.find((user) => user.id === id);
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return user;
   }
 
   createUser(login: string, password: string): User {
