@@ -6,10 +6,12 @@ import {
   HttpStatus,
   Param,
   Post,
+  Put,
 } from '@nestjs/common';
 import { UserSercvice } from './user.service';
 import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
+import { UpdatePasswordDto } from './dto/update-password.dto';
 
 @Controller('user')
 export class UserController {
@@ -35,5 +37,13 @@ export class UserController {
   @HttpCode(HttpStatus.CREATED)
   create(@Body() { login, password }: CreateUserDto): User {
     return this.userService.createUser(login, password);
+  }
+
+  @Put(':id')
+  updatePassword(
+    @Param('id') id: string,
+    @Body() updatePasswordDto: UpdatePasswordDto,
+  ): User {
+    return this.userService.updatePassword(id, updatePasswordDto);
   }
 }
