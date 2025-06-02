@@ -6,10 +6,12 @@ import {
   HttpStatus,
   Param,
   Post,
+  Put,
 } from '@nestjs/common';
 import { AlbumService } from './album.service';
 import { Album } from './entities/album.entity';
-import { createAlbumDto } from './dto/create-album.dto';
+import { CreateAlbumDto } from './dto/create-album.dto';
+import { UpdateAlbumDto } from './dto/update-album.dto';
 
 @Controller('album')
 export class AlbumController {
@@ -27,7 +29,12 @@ export class AlbumController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  createAlbum(@Body() { name, year, artistId }: createAlbumDto): Album {
+  createAlbum(@Body() { name, year, artistId }: CreateAlbumDto): Album {
     return this.albumService.createAlbum(name, year, artistId);
+  }
+
+  @Put(':id')
+  updateAlbum(@Param('id') id: string, @Body() updateAlbumDto: UpdateAlbumDto) {
+    return this.albumService.updateAlbum(id, updateAlbumDto);
   }
 }

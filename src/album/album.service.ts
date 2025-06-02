@@ -6,6 +6,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
+import { UpdateAlbumDto } from './dto/update-album.dto';
 
 @Injectable()
 export class AlbumService {
@@ -30,7 +31,7 @@ export class AlbumService {
     const album = this.albums.find((user) => user.id === id);
 
     if (!album) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException('Album not found');
     }
 
     return album;
@@ -47,5 +48,23 @@ export class AlbumService {
     this.albums.push(newAlbum);
 
     return newAlbum;
+  }
+
+  updateAlbum(id: string, { name, year, artistId }: UpdateAlbumDto) {
+    if (!isValidUUID(id)) {
+      throw new BadRequestException('Invalid album ID format');
+    }
+
+    const album = this.getAlbumById(id);
+
+    if (!album) {
+      throw new NotFoundException('Album not found');
+    }
+
+    album.name = name;
+    album.year = year;
+    album.artistId = artistId;
+
+    return album;
   }
 }
