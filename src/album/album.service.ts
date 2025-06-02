@@ -67,4 +67,18 @@ export class AlbumService {
 
     return album;
   }
+
+  deleteAlbum(id: string) {
+    if (!isValidUUID(id)) {
+      throw new BadRequestException('Invalid album ID format');
+    }
+
+    const artistIndex = this.albums.findIndex((u) => u.id === id);
+
+    if (artistIndex === -1) {
+      throw new NotFoundException('Album not found');
+    }
+
+    this.albums.splice(artistIndex, 1);
+  }
 }

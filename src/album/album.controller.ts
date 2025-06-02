@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
@@ -36,5 +37,11 @@ export class AlbumController {
   @Put(':id')
   updateAlbum(@Param('id') id: string, @Body() updateAlbumDto: UpdateAlbumDto) {
     return this.albumService.updateAlbum(id, updateAlbumDto);
+  }
+
+  @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  deleteAlbum(@Param('id') id: string) {
+    this.albumService.deleteAlbum(id);
   }
 }
