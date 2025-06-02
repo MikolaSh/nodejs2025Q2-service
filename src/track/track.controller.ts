@@ -6,9 +6,11 @@ import {
   HttpStatus,
   Param,
   Post,
+  Put,
 } from '@nestjs/common';
 import { TrackService } from './track.service';
 import { CreateTrackDto } from './dto/create-track.dto';
+import { UpdateTrackDto } from './dto/update-track.dto';
 
 @Controller('track')
 export class TrackController {
@@ -28,5 +30,10 @@ export class TrackController {
   @HttpCode(HttpStatus.CREATED)
   createTrack(@Body() { name, artistId, albumId, duration }: CreateTrackDto) {
     return this.trackService.createTrack(name, artistId, albumId, duration);
+  }
+
+  @Put(':id')
+  updateTrack(@Param('id') id: string, @Body() updateTrackDto: UpdateTrackDto) {
+    return this.trackService.updateTrack(id, updateTrackDto);
   }
 }

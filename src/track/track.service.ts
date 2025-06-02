@@ -6,6 +6,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
+import { UpdateTrackDto } from './dto/update-track.dto';
 
 @Injectable()
 export class TrackService {
@@ -53,5 +54,27 @@ export class TrackService {
     this.tracks.push(newTrack);
 
     return newTrack;
+  }
+
+  updateTrack(
+    id: string,
+    { name, artistId, albumId, duration }: UpdateTrackDto,
+  ) {
+    if (!isValidUUID(id)) {
+      throw new BadRequestException('Invalid track ID format');
+    }
+
+    const track = this.getTrackById(id);
+
+    if (!track) {
+      throw new NotFoundException('Track not found');
+    }
+
+    track.name = name;
+    track.artistId = artistId;
+    track.albumId = albumId;
+    track.duration = duration;
+
+    return track;
   }
 }
