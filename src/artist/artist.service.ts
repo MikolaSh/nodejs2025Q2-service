@@ -6,6 +6,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
+import { UpdateArtistDto } from './dto/update-artist.dto';
 
 @Injectable()
 export class ArtistService {
@@ -45,5 +46,22 @@ export class ArtistService {
     this.artists.push(newArtist);
 
     return newArtist;
+  }
+
+  updateArtist(id: string, { name, grammy }: UpdateArtistDto) {
+    if (!isValidUUID(id)) {
+      throw new BadRequestException('Invalid artist ID format');
+    }
+
+    const artist = this.getArtistById(id);
+
+    if (!artist) {
+      throw new NotFoundException('Artist not found');
+    }
+
+    artist.name = name;
+    artist.grammy = grammy;
+
+    return artist;
   }
 }
