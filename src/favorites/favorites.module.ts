@@ -5,9 +5,6 @@ import { TrackModule } from 'src/track/track.module';
 import { AlbumModule } from '../album/album.module';
 import { ArtistModule } from '../artist/artist.module';
 
-console.log('TrackModule:', TrackModule);
-console.log('AlbumModule:', AlbumModule);
-console.log('ArtistModule:', ArtistModule);
 @Module({
   imports: [
     forwardRef(() => TrackModule),

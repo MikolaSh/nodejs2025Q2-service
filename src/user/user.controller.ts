@@ -9,15 +9,15 @@ import {
   Post,
   Put,
 } from '@nestjs/common';
-import { UserSercvice } from './user.service';
+import { UserService } from './user.service';
 import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
-import { UserResponseDto } from './dto/create-response.dto';
+import { UserResponseDto } from './dto/user-response.dto';
 
 @Controller('user')
 export class UserController {
-  constructor(private readonly userService: UserSercvice) {}
+  constructor(private readonly userService: UserService) {}
 
   @Get()
   getAllUsers() {
