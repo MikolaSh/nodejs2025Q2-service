@@ -43,4 +43,17 @@ export class FavoritesController {
   removeAlbum(@Param('id') id: string) {
     this.favoritesService.removeAlbum(id);
   }
+
+  @Post('artist/:id')
+  @HttpCode(HttpStatus.CREATED)
+  addArtist(@Param('id') id: string) {
+    this.favoritesService.addArtist(id);
+    return { message: 'Artist added to favorites' };
+  }
+
+  @Delete('artist/:id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  removeArtist(@Param('id') id: string) {
+    this.favoritesService.removeArtist(id);
+  }
 }
