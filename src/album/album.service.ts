@@ -10,12 +10,15 @@ import {
 import { v4 as uuidv4 } from 'uuid';
 import { UpdateAlbumDto } from './dto/update-album.dto';
 import { TrackService } from 'src/track/track.service';
+import { FavoritesService } from 'src/favorites/favorites.service';
 
 @Injectable()
 export class AlbumService {
   constructor(
     @Inject(forwardRef(() => TrackService))
     private readonly trackService: TrackService,
+    @Inject(forwardRef(() => FavoritesService))
+    private readonly favoritesService: FavoritesService,
   ) {}
 
   private albums: Array<Album> = [
@@ -88,6 +91,7 @@ export class AlbumService {
     }
 
     this.trackService.removeAlbumFromTracks(id);
+    this.favoritesService.removeAlbumFromFavorites(id);
 
     this.albums.splice(artistIndex, 1);
   }

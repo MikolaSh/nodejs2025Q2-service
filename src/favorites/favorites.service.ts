@@ -89,10 +89,45 @@ export class FavoritesService {
     this.favorites.tracks.splice(index, 1);
   }
 
+  addAlbum(id: string) {
+    if (!isValidUUID(id)) {
+      throw new BadRequestException('Invalid album ID');
+    }
+
+    try {
+      this.albumService.getAlbumById(id);
+      if (!this.favorites.albums.includes(id)) {
+        this.favorites.albums.push(id);
+      }
+    } catch (e) {
+      throw new UnprocessableEntityException('Album not found');
+    }
+  }
+
+  removeAlbum(id: string) {
+    if (!isValidUUID(id)) {
+      throw new BadRequestException('Invalid album ID');
+    }
+
+    const index = this.favorites.albums.indexOf(id);
+    if (index === -1) {
+      throw new NotFoundException('Album not found in favorites');
+    }
+
+    this.favorites.albums.splice(index, 1);
+  }
+
   removeTrackFromFavorites(trackId: string): void {
     const index = this.favorites.tracks.indexOf(trackId);
     if (index !== -1) {
       this.favorites.tracks.splice(index, 1);
+    }
+  }
+
+  removeAlbumFromFavorites(albumId: string): void {
+    const index = this.favorites.albums.indexOf(albumId);
+    if (index !== -1) {
+      this.favorites.albums.splice(index, 1);
     }
   }
 }
