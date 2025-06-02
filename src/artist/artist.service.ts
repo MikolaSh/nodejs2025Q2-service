@@ -2,18 +2,24 @@ import { isValidUUID } from 'src/utils';
 import { Artist } from './entities/artist.entity';
 import {
   BadRequestException,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
 import { UpdateArtistDto } from './dto/update-artist.dto';
+import { AlbumService } from 'src/album/album.service';
 
 @Injectable()
 export class ArtistService {
+  constructor(
+    @Inject(AlbumService) private readonly albumService: AlbumService,
+  ) {}
+
   private artists: Array<Artist> = [
     {
-      id: uuidv4(),
-      name: 'Ivan Dorn',
+      id: 'b9387067-eef5-4c7a-9045-765286b3e52d',
+      name: 'Radiohead',
       grammy: false,
     },
   ];
@@ -73,8 +79,10 @@ export class ArtistService {
     const artistIndex = this.artists.findIndex((u) => u.id === id);
 
     if (artistIndex === -1) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException('Artist not found');
     }
+
+    this.albumService.removeArtistFromAlbums(id);
 
     this.artists.splice(artistIndex, 1);
   }

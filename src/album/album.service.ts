@@ -12,10 +12,10 @@ import { UpdateAlbumDto } from './dto/update-album.dto';
 export class AlbumService {
   private albums: Array<Album> = [
     {
-      id: uuidv4(),
-      name: 'In Rainbows',
-      year: 2001,
-      artistId: null,
+      id: 'd73dca6f-5ec9-4301-9dc9-296e8178a5a7',
+      name: 'OK Computer',
+      year: 1997,
+      artistId: 'b9387067-eef5-4c7a-9045-765286b3e52d',
     },
   ];
 
@@ -80,5 +80,13 @@ export class AlbumService {
     }
 
     this.albums.splice(artistIndex, 1);
+  }
+
+  removeArtistFromAlbums(artistId: string) {
+    this.albums.forEach((album) => {
+      if (album.artistId === artistId) {
+        album.artistId = null; // Прямое изменение объекта
+      }
+    });
   }
 }
