@@ -34,4 +34,16 @@ export class ArtistService {
 
     return artist;
   }
+
+  createArtist(name: string, grammy: boolean): Artist {
+    const newArtist = {
+      id: uuidv4(),
+      name,
+      grammy,
+    };
+
+    this.artists.push(newArtist);
+
+    return newArtist;
+  }
 }

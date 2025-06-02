@@ -1,5 +1,7 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { ArtistService } from './artist.service';
+import { CreateArtistDto } from './dto/create-artist.dto';
+import { Artist } from './entities/artist.entity';
 
 @Controller('artist')
 export class ArtistController {
@@ -13,5 +15,10 @@ export class ArtistController {
   @Get(':id')
   getArtist(@Param('id') id: string) {
     return this.artistService.getArtistById(id);
+  }
+
+  @Post()
+  create(@Body() { name, grammy }: CreateArtistDto): Artist {
+    return this.artistService.createArtist(name, grammy);
   }
 }
