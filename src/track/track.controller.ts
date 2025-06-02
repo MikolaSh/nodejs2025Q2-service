@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
@@ -35,5 +36,10 @@ export class TrackController {
   @Put(':id')
   updateTrack(@Param('id') id: string, @Body() updateTrackDto: UpdateTrackDto) {
     return this.trackService.updateTrack(id, updateTrackDto);
+  }
+
+  @Delete(':id')
+  deleteTrack(@Param('id') id: string) {
+    this.trackService.deleteTrack(id);
   }
 }

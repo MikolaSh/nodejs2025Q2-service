@@ -77,4 +77,18 @@ export class TrackService {
 
     return track;
   }
+
+  deleteTrack(id: string) {
+    if (!isValidUUID(id)) {
+      throw new BadRequestException('Invalid track ID format');
+    }
+
+    const trackIndex = this.tracks.findIndex((u) => u.id === id);
+
+    if (trackIndex === -1) {
+      throw new NotFoundException('Album not found');
+    }
+
+    this.tracks.splice(trackIndex, 1);
+  }
 }
