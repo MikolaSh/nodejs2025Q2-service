@@ -36,4 +36,22 @@ export class TrackService {
 
     return track;
   }
+
+  createTrack(
+    name: string,
+    artistId: string,
+    albumId: string,
+    duration: number,
+  ): Track {
+    const newTrack = {
+      id: uuidv4(),
+      name,
+      artistId,
+      albumId,
+      duration,
+    };
+    this.tracks.push(newTrack);
+
+    return newTrack;
+  }
 }
