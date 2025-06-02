@@ -64,4 +64,18 @@ export class ArtistService {
 
     return artist;
   }
+
+  deleteArtist(id: string) {
+    if (!isValidUUID(id)) {
+      throw new BadRequestException('Invalid artist ID format');
+    }
+
+    const artistIndex = this.artists.findIndex((u) => u.id === id);
+
+    if (artistIndex === -1) {
+      throw new NotFoundException('User not found');
+    }
+
+    this.artists.splice(artistIndex, 1);
+  }
 }
