@@ -39,6 +39,7 @@ export class TrackController {
   }
 
   @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
   deleteTrack(@Param('id') id: string) {
     this.trackService.deleteTrack(id);
   }

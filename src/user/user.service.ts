@@ -9,25 +9,18 @@ import { User } from './entities/user.entity';
 import { v4 as uuidv4 } from 'uuid';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import { isValidUUID } from 'src/utils';
+import { plainToInstance } from 'class-transformer';
+import { UserResponseDto } from './dto/create-response.dto';
 
 @Injectable()
 export class UserSercvice {
-  private users: Array<User> = [
-    {
-      id: uuidv4(),
-      login: 'Jhon Doe',
-      password: 'demo123',
-      version: 1,
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
-    },
-  ];
+  private users: Array<User> = [];
 
   getAll() {
     return this.users;
   }
 
-  getById(id: string) {
+  getById(id: string): UserResponseDto {
     if (!isValidUUID(id)) {
       throw new BadRequestException('Invalid user ID format');
     }
@@ -38,10 +31,12 @@ export class UserSercvice {
       throw new NotFoundException('User not found');
     }
 
-    return user;
+    return plainToInstance(UserResponseDto, user, {
+      excludeExtraneousValues: true,
+    });
   }
 
-  createUser(login: string, password: string): User {
+  createUser(login: string, password: string): UserResponseDto {
     const userExists = this.users.some((user) => user.login === login);
 
     if (userExists) {
@@ -58,7 +53,10 @@ export class UserSercvice {
     };
 
     this.users.push(newUser);
-    return newUser;
+
+    return plainToInstance(UserResponseDto, newUser, {
+      excludeExtraneousValues: true,
+    });
   }
 
   updatePassword(id: string, { oldPassword, newPassword }: UpdatePasswordDto) {
