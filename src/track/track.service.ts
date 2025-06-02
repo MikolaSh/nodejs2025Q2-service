@@ -13,8 +13,8 @@ export class TrackService {
   private tracks: Array<Track> = [
     {
       id: uuidv4(),
-      name: 'All I need',
-      artistId: null,
+      name: 'No suprises',
+      artistId: 'b9387067-eef5-4c7a-9045-765286b3e52d',
       albumId: null,
       duration: 324,
     },
@@ -90,5 +90,13 @@ export class TrackService {
     }
 
     this.tracks.splice(trackIndex, 1);
+  }
+
+  removeArtistFromTracks(artistId: string) {
+    this.tracks.forEach((track) => {
+      if (track.artistId === artistId) {
+        track.artistId = null;
+      }
+    });
   }
 }

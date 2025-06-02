@@ -9,11 +9,13 @@ import {
 import { v4 as uuidv4 } from 'uuid';
 import { UpdateArtistDto } from './dto/update-artist.dto';
 import { AlbumService } from 'src/album/album.service';
+import { TrackService } from 'src/track/track.service';
 
 @Injectable()
 export class ArtistService {
   constructor(
     @Inject(AlbumService) private readonly albumService: AlbumService,
+    @Inject(TrackService) private readonly trackService: TrackService,
   ) {}
 
   private artists: Array<Artist> = [
@@ -83,6 +85,7 @@ export class ArtistService {
     }
 
     this.albumService.removeArtistFromAlbums(id);
+    this.trackService.removeArtistFromTracks(id);
 
     this.artists.splice(artistIndex, 1);
   }

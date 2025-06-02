@@ -85,7 +85,7 @@ export class AlbumService {
   removeArtistFromAlbums(artistId: string) {
     this.albums.forEach((album) => {
       if (album.artistId === artistId) {
-        album.artistId = null; // Прямое изменение объекта
+        album.artistId = null;
       }
     });
   }
