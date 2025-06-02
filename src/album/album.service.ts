@@ -35,4 +35,17 @@ export class AlbumService {
 
     return album;
   }
+
+  createAlbum(name: string, year: number, artistId: string | null): Album {
+    const newAlbum = {
+      id: uuidv4(),
+      name,
+      year,
+      artistId,
+    };
+
+    this.albums.push(newAlbum);
+
+    return newAlbum;
+  }
 }
