@@ -2,14 +2,20 @@ import { isValidUUID } from 'src/utils';
 import { Album } from './entities/album.entity';
 import {
   BadRequestException,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
 import { UpdateAlbumDto } from './dto/update-album.dto';
+import { TrackService } from 'src/track/track.service';
 
 @Injectable()
 export class AlbumService {
+  constructor(
+    @Inject(TrackService) private readonly trackService: TrackService,
+  ) {}
+
   private albums: Array<Album> = [
     {
       id: 'd73dca6f-5ec9-4301-9dc9-296e8178a5a7',
@@ -78,6 +84,8 @@ export class AlbumService {
     if (artistIndex === -1) {
       throw new NotFoundException('Album not found');
     }
+
+    this.trackService.removeAlbumFromTracks(id);
 
     this.albums.splice(artistIndex, 1);
   }

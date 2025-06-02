@@ -15,7 +15,7 @@ export class TrackService {
       id: uuidv4(),
       name: 'No suprises',
       artistId: 'b9387067-eef5-4c7a-9045-765286b3e52d',
-      albumId: null,
+      albumId: 'd73dca6f-5ec9-4301-9dc9-296e8178a5a7',
       duration: 324,
     },
   ];
@@ -96,6 +96,14 @@ export class TrackService {
     this.tracks.forEach((track) => {
       if (track.artistId === artistId) {
         track.artistId = null;
+      }
+    });
+  }
+
+  removeAlbumFromTracks(albumId: string) {
+    this.tracks.forEach((track) => {
+      if (track.albumId === albumId) {
+        track.albumId = null;
       }
     });
   }
