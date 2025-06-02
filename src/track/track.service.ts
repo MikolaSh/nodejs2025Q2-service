@@ -2,14 +2,22 @@ import { isValidUUID } from 'src/utils';
 import { Track } from './entities/track.entety';
 import {
   BadRequestException,
+  forwardRef,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
 import { UpdateTrackDto } from './dto/update-track.dto';
+import { FavoritesService } from 'src/favorites/favorites.service';
 
 @Injectable()
 export class TrackService {
+  constructor(
+    @Inject(forwardRef(() => FavoritesService))
+    private readonly favoritesService: FavoritesService,
+  ) {}
+
   private tracks: Array<Track> = [
     {
       id: uuidv4(),
@@ -88,6 +96,8 @@ export class TrackService {
     if (trackIndex === -1) {
       throw new NotFoundException('Album not found');
     }
+
+    this.favoritesService.removeTrackFromFavorites(id);
 
     this.tracks.splice(trackIndex, 1);
   }

@@ -1,0 +1,98 @@
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  UnprocessableEntityException,
+  Inject,
+  forwardRef,
+} from '@nestjs/common';
+import { isValidUUID } from '../utils';
+import { TrackService } from '../track/track.service';
+import { AlbumService } from '../album/album.service';
+import { ArtistService } from '../artist/artist.service';
+import { Favorites, FavoritesResponse } from './entities/favorites.entity';
+
+@Injectable()
+export class FavoritesService {
+  private favorites: Favorites = {
+    artists: [],
+    albums: [],
+    tracks: [],
+  };
+
+  constructor(
+    @Inject(forwardRef(() => TrackService)) private trackService: TrackService,
+    @Inject(forwardRef(() => AlbumService)) private albumService: AlbumService,
+    @Inject(forwardRef(() => ArtistService))
+    private artistService: ArtistService,
+  ) {}
+
+  async getAll(): Promise<FavoritesResponse> {
+    const artists = this.favorites.artists
+      .map((id) => {
+        try {
+          return this.artistService.getArtistById(id);
+        } catch {
+          return null;
+        }
+      })
+      .filter((artist) => artist !== null);
+
+    const albums = this.favorites.albums
+      .map((id) => {
+        try {
+          return this.albumService.getAlbumById(id);
+        } catch {
+          return null;
+        }
+      })
+      .filter((album) => album !== null);
+
+    const tracks = this.favorites.tracks
+      .map((id) => {
+        try {
+          return this.trackService.getTrackById(id);
+        } catch {
+          return null;
+        }
+      })
+      .filter((track) => track !== null);
+
+    return { artists, albums, tracks };
+  }
+
+  addTrack(id: string) {
+    if (!isValidUUID(id)) {
+      throw new BadRequestException('Invalid track ID');
+    }
+
+    try {
+      this.trackService.getTrackById(id);
+      if (!this.favorites.tracks.includes(id)) {
+        this.favorites.tracks.push(id);
+      }
+    } catch (e) {
+      throw new UnprocessableEntityException('Track not found');
+    }
+  }
+
+  removeTrack(id: string) {
+    if (!isValidUUID(id)) {
+      throw new BadRequestException('Invalid track ID');
+    }
+
+    const index = this.favorites.tracks.indexOf(id);
+    if (index === -1) {
+      throw new NotFoundException('Track not found in favorites');
+    }
+
+    this.favorites.tracks.splice(index, 1);
+  }
+
+  removeTrackFromFavorites(trackId: string): void {
+    const index = this.favorites.tracks.indexOf(trackId);
+    if (index !== -1) {
+      this.favorites.tracks.splice(index, 1);
+    }
+  }
+}

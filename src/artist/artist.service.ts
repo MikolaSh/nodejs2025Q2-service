@@ -2,6 +2,7 @@ import { isValidUUID } from 'src/utils';
 import { Artist } from './entities/artist.entity';
 import {
   BadRequestException,
+  forwardRef,
   Inject,
   Injectable,
   NotFoundException,
@@ -14,8 +15,10 @@ import { TrackService } from 'src/track/track.service';
 @Injectable()
 export class ArtistService {
   constructor(
-    @Inject(AlbumService) private readonly albumService: AlbumService,
-    @Inject(TrackService) private readonly trackService: TrackService,
+    @Inject(forwardRef(() => AlbumService))
+    private readonly albumService: AlbumService,
+    @Inject(forwardRef(() => TrackService))
+    private readonly trackService: TrackService,
   ) {}
 
   private artists: Array<Artist> = [
