@@ -1,168 +1,142 @@
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Favorites, FavoritesResponse } from './entities/favorites.entity';
 import {
+  BadRequestException,
+  forwardRef,
+  Inject,
   Injectable,
   NotFoundException,
-  BadRequestException,
-  UnprocessableEntityException,
-  Inject,
-  forwardRef,
 } from '@nestjs/common';
-import { isValidUUID } from '../utils';
-import { TrackService } from '../track/track.service';
-import { AlbumService } from '../album/album.service';
-import { ArtistService } from '../artist/artist.service';
-import { Favorites, FavoritesResponse } from './entities/favorites.entity';
+import { TrackService } from 'src/track/track.service';
+import { AlbumService } from 'src/album/album.service';
+import { ArtistService } from 'src/artist/artist.service';
+import { isValidUUID } from 'src/utils';
 
 @Injectable()
 export class FavoritesService {
-  private favorites: Favorites = {
-    artists: [],
-    albums: [],
-    tracks: [],
-  };
+  private readonly SINGLE_ID = 'singleton-favs';
 
   constructor(
+    @InjectRepository(Favorites)
+    private readonly favRepo: Repository<Favorites>,
     @Inject(forwardRef(() => TrackService)) private trackService: TrackService,
     @Inject(forwardRef(() => AlbumService)) private albumService: AlbumService,
     @Inject(forwardRef(() => ArtistService))
     private artistService: ArtistService,
   ) {}
 
+  private async getOrCreate(): Promise<Favorites> {
+    let fav = await this.favRepo.findOne({ where: { id: this.SINGLE_ID } });
+    if (!fav) {
+      fav = this.favRepo.create({
+        id: this.SINGLE_ID,
+        artists: [],
+        albums: [],
+        tracks: [],
+      });
+      await this.favRepo.save(fav);
+    }
+    return fav;
+  }
+
   async getAll(): Promise<FavoritesResponse> {
-    const artists = await Promise.all(
-      this.favorites.artists.map(async (id) => {
-        try {
-          return await this.artistService.getArtistById(id);
-        } catch {
-          return null;
-        }
-      }),
-    ).then((res) => res.filter((artist) => artist !== null));
+    const fav = await this.getOrCreate();
 
-    const albums = await Promise.all(
-      this.favorites.albums.map(async (id) => {
-        try {
-          return await this.albumService.getAlbumById(id);
-        } catch {
-          return null;
-        }
-      }),
-    ).then((res) => res.filter((album) => album !== null));
+    const [artists, albums, tracks] = await Promise.all([
+      Promise.all(
+        fav.artists.map((id) =>
+          this.artistService.getArtistById(id).catch(() => null),
+        ),
+      ),
+      Promise.all(
+        fav.albums.map((id) =>
+          this.albumService.getAlbumById(id).catch(() => null),
+        ),
+      ),
+      Promise.all(
+        fav.tracks.map((id) =>
+          this.trackService.getTrackById(id).catch(() => null),
+        ),
+      ),
+    ]);
 
-    const tracks = await Promise.all(
-      this.favorites.tracks.map(async (id) => {
-        try {
-          return await this.trackService.getTrackById(id);
-        } catch {
-          return null;
-        }
-      }),
-    ).then((res) => res.filter((track) => track !== null));
-
-    return { artists, albums, tracks };
+    return {
+      artists: artists.filter(Boolean),
+      albums: albums.filter(Boolean),
+      tracks: tracks.filter(Boolean),
+    };
   }
 
-  addTrack(id: string) {
-    if (!isValidUUID(id)) {
-      throw new BadRequestException('Invalid track ID');
-    }
-
-    try {
-      this.trackService.getTrackById(id);
-      if (!this.favorites.tracks.includes(id)) {
-        this.favorites.tracks.push(id);
-      }
-    } catch (e) {
-      throw new UnprocessableEntityException('Track not found');
+  async addTrack(id: string) {
+    if (!isValidUUID(id)) throw new BadRequestException('Invalid track ID');
+    await this.trackService.getTrackById(id);
+    const fav = await this.getOrCreate();
+    if (!fav.tracks.includes(id)) {
+      fav.tracks.push(id);
+      await this.favRepo.save(fav);
     }
   }
 
-  removeTrack(id: string) {
-    if (!isValidUUID(id)) {
-      throw new BadRequestException('Invalid track ID');
-    }
-
-    const index = this.favorites.tracks.indexOf(id);
-    if (index === -1) {
-      throw new NotFoundException('Track not found in favorites');
-    }
-
-    this.favorites.tracks.splice(index, 1);
+  async removeTrack(id: string) {
+    const fav = await this.getOrCreate();
+    const index = fav.tracks.indexOf(id);
+    if (index === -1) throw new NotFoundException('Track not in favorites');
+    fav.tracks.splice(index, 1);
+    await this.favRepo.save(fav);
   }
 
-  addAlbum(id: string) {
-    if (!isValidUUID(id)) {
-      throw new BadRequestException('Invalid album ID');
-    }
-
-    try {
-      this.albumService.getAlbumById(id);
-      if (!this.favorites.albums.includes(id)) {
-        this.favorites.albums.push(id);
-      }
-    } catch (e) {
-      throw new UnprocessableEntityException('Album not found');
+  async addAlbum(id: string) {
+    if (!isValidUUID(id)) throw new BadRequestException('Invalid album ID');
+    await this.albumService.getAlbumById(id);
+    const fav = await this.getOrCreate();
+    if (!fav.albums.includes(id)) {
+      fav.albums.push(id);
+      await this.favRepo.save(fav);
     }
   }
 
-  removeAlbum(id: string) {
-    if (!isValidUUID(id)) {
-      throw new BadRequestException('Invalid album ID');
-    }
-
-    const index = this.favorites.albums.indexOf(id);
-    if (index === -1) {
-      throw new NotFoundException('Album not found in favorites');
-    }
-
-    this.favorites.albums.splice(index, 1);
+  async removeAlbum(id: string) {
+    const fav = await this.getOrCreate();
+    const index = fav.albums.indexOf(id);
+    if (index === -1) throw new NotFoundException('Album not in favorites');
+    fav.albums.splice(index, 1);
+    await this.favRepo.save(fav);
   }
 
-  addArtist(id: string) {
-    if (!isValidUUID(id)) {
-      throw new BadRequestException('Invalid atist ID');
-    }
-
-    try {
-      this.artistService.getArtistById(id);
-      if (!this.favorites.artists.includes(id)) {
-        this.favorites.artists.push(id);
-      }
-    } catch (e) {
-      throw new UnprocessableEntityException('Artist not found');
+  async addArtist(id: string) {
+    if (!isValidUUID(id)) throw new BadRequestException('Invalid artist ID');
+    await this.artistService.getArtistById(id);
+    const fav = await this.getOrCreate();
+    if (!fav.artists.includes(id)) {
+      fav.artists.push(id);
+      await this.favRepo.save(fav);
     }
   }
 
-  removeArtist(id: string) {
-    if (!isValidUUID(id)) {
-      throw new BadRequestException('Invalid artist ID');
-    }
-
-    const index = this.favorites.artists.indexOf(id);
-    if (index === -1) {
-      throw new NotFoundException('Artist not found in favorites');
-    }
-
-    this.favorites.artists.splice(index, 1);
+  async removeArtist(id: string) {
+    const fav = await this.getOrCreate();
+    const index = fav.artists.indexOf(id);
+    if (index === -1) throw new NotFoundException('Artist not in favorites');
+    fav.artists.splice(index, 1);
+    await this.favRepo.save(fav);
   }
 
-  removeTrackFromFavorites(trackId: string): void {
-    const index = this.favorites.tracks.indexOf(trackId);
-    if (index !== -1) {
-      this.favorites.tracks.splice(index, 1);
-    }
+  async removeTrackFromFavorites(trackId: string): Promise<void> {
+    const fav = await this.getOrCreate();
+    fav.tracks = fav.tracks.filter((id) => id !== trackId);
+    await this.favRepo.save(fav);
   }
 
-  removeAlbumFromFavorites(albumId: string): void {
-    const index = this.favorites.albums.indexOf(albumId);
-    if (index !== -1) {
-      this.favorites.albums.splice(index, 1);
-    }
+  async removeAlbumFromFavorites(albumId: string): Promise<void> {
+    const fav = await this.getOrCreate();
+    fav.albums = fav.albums.filter((id) => id !== albumId);
+    await this.favRepo.save(fav);
   }
 
-  removeArtistFromFavorites(artistId: string): void {
-    const index = this.favorites.artists.indexOf(artistId);
-    if (index !== -1) {
-      this.favorites.artists.splice(index, 1);
-    }
+  async removeArtistFromFavorites(artistId: string): Promise<void> {
+    const fav = await this.getOrCreate();
+    fav.artists = fav.artists.filter((id) => id !== artistId);
+    await this.favRepo.save(fav);
   }
 }

@@ -11,7 +11,6 @@ import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { v4 as uuidv4, validate as isUUID } from 'uuid';
 import { UpdatePasswordDto } from './dto/update-password.dto';
-// import { CreateUserDto } from './dto/create-user.dto';
 import { UserResponseDto } from './dto/user-response.dto';
 import { plainToInstance } from 'class-transformer';
 
