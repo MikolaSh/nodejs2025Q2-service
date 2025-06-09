@@ -213,3 +213,21 @@ If you are using VS Code:
 - `DELETE /favs/track/:id` — remove a track from favorites  
 - `DELETE /favs/album/:id` — remove an album from favorites  
 - `DELETE /favs/artist/:id` — remove an artist from favorites  
+
+
+### Docker setup
+
+To start the app in docker, you need to install **docker** and **docker compose** on your pc.
+
+To start the application and PostgreSQL database using Docker:
+
+```bash
+docker-compose up --build
+```
+from the root directory of the app.
+
+If you want to reset the database:
+```bash
+docker-compose down -v
+docker-compose up --build
+```
