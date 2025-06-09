@@ -1,5 +1,3 @@
-import { isValidUUID } from 'src/utils';
-import { Track } from './entities/track.entety';
 import {
   BadRequestException,
   forwardRef,
@@ -7,37 +5,33 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { v4 as uuidv4 } from 'uuid';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { UpdateTrackDto } from './dto/update-track.dto';
 import { FavoritesService } from 'src/favorites/favorites.service';
+import { isValidUUID } from 'src/utils';
+import { Track } from './entities/track.entety';
 
 @Injectable()
 export class TrackService {
   constructor(
+    @InjectRepository(Track)
+    private readonly trackRepo: Repository<Track>,
+
     @Inject(forwardRef(() => FavoritesService))
     private readonly favoritesService: FavoritesService,
   ) {}
 
-  private tracks: Array<Track> = [
-    {
-      id: uuidv4(),
-      name: 'No suprises',
-      artistId: 'b9387067-eef5-4c7a-9045-765286b3e52d',
-      albumId: 'd73dca6f-5ec9-4301-9dc9-296e8178a5a7',
-      duration: 324,
-    },
-  ];
-
-  getAllTracks() {
-    return this.tracks;
+  async getAllTracks(): Promise<Track[]> {
+    return this.trackRepo.find();
   }
 
-  getTrackById(id: string) {
+  async getTrackById(id: string): Promise<Track> {
     if (!isValidUUID(id)) {
       throw new BadRequestException('Invalid track ID format');
     }
 
-    const track = this.tracks.find((user) => user.id === id);
+    const track = await this.trackRepo.findOne({ where: { id } });
 
     if (!track) {
       throw new NotFoundException('Track not found');
@@ -46,75 +40,54 @@ export class TrackService {
     return track;
   }
 
-  createTrack(
+  async createTrack(
     name: string,
-    artistId: string,
-    albumId: string,
+    artistId: string | null,
+    albumId: string | null,
     duration: number,
-  ): Track {
-    const newTrack = {
-      id: uuidv4(),
+  ): Promise<Track> {
+    const newTrack = this.trackRepo.create({
       name,
       artistId,
       albumId,
       duration,
-    };
-    this.tracks.push(newTrack);
-
-    return newTrack;
-  }
-
-  updateTrack(
-    id: string,
-    { name, artistId, albumId, duration }: UpdateTrackDto,
-  ) {
-    if (!isValidUUID(id)) {
-      throw new BadRequestException('Invalid track ID format');
-    }
-
-    const track = this.getTrackById(id);
-
-    if (!track) {
-      throw new NotFoundException('Track not found');
-    }
-
-    track.name = name;
-    track.artistId = artistId;
-    track.albumId = albumId;
-    track.duration = duration;
-
-    return track;
-  }
-
-  deleteTrack(id: string) {
-    if (!isValidUUID(id)) {
-      throw new BadRequestException('Invalid track ID format');
-    }
-
-    const trackIndex = this.tracks.findIndex((u) => u.id === id);
-
-    if (trackIndex === -1) {
-      throw new NotFoundException('Album not found');
-    }
-
-    this.favoritesService.removeTrackFromFavorites(id);
-
-    this.tracks.splice(trackIndex, 1);
-  }
-
-  removeArtistFromTracks(artistId: string) {
-    this.tracks.forEach((track) => {
-      if (track.artistId === artistId) {
-        track.artistId = null;
-      }
     });
+    return this.trackRepo.save(newTrack);
   }
 
-  removeAlbumFromTracks(albumId: string) {
-    this.tracks.forEach((track) => {
-      if (track.albumId === albumId) {
-        track.albumId = null;
-      }
-    });
+  async updateTrack(id: string, dto: UpdateTrackDto): Promise<Track> {
+    const track = await this.getTrackById(id);
+
+    track.name = dto.name;
+    track.artistId = dto.artistId;
+    track.albumId = dto.albumId;
+    track.duration = dto.duration;
+
+    return this.trackRepo.save(track);
+  }
+
+  async deleteTrack(id: string): Promise<void> {
+    const track = await this.getTrackById(id);
+
+    await this.favoritesService.removeTrackFromFavorites(id);
+    await this.trackRepo.delete(track.id);
+  }
+
+  async removeArtistFromTracks(artistId: string): Promise<void> {
+    await this.trackRepo
+      .createQueryBuilder()
+      .update(Track)
+      .set({ artistId: null })
+      .where('artistId = :artistId', { artistId })
+      .execute();
+  }
+
+  async removeAlbumFromTracks(albumId: string): Promise<void> {
+    await this.trackRepo
+      .createQueryBuilder()
+      .update(Track)
+      .set({ albumId: null })
+      .where('albumId = :albumId', { albumId })
+      .execute();
   }
 }

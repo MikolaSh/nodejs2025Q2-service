@@ -12,35 +12,44 @@ import {
 import { TrackService } from './track.service';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
+import { Track } from './entities/track.entety';
 
 @Controller('track')
 export class TrackController {
   constructor(private readonly trackService: TrackService) {}
 
   @Get()
-  getAllTracks() {
+  getAllTracks(): Promise<Track[]> {
     return this.trackService.getAllTracks();
   }
 
   @Get(':id')
-  getTrckById(@Param('id') id: string) {
+  getTrackById(@Param('id') id: string): Promise<Track> {
     return this.trackService.getTrackById(id);
   }
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  createTrack(@Body() { name, artistId, albumId, duration }: CreateTrackDto) {
-    return this.trackService.createTrack(name, artistId, albumId, duration);
+  createTrack(@Body() dto: CreateTrackDto): Promise<Track> {
+    return this.trackService.createTrack(
+      dto.name,
+      dto.artistId,
+      dto.albumId,
+      dto.duration,
+    );
   }
 
   @Put(':id')
-  updateTrack(@Param('id') id: string, @Body() updateTrackDto: UpdateTrackDto) {
-    return this.trackService.updateTrack(id, updateTrackDto);
+  updateTrack(
+    @Param('id') id: string,
+    @Body() dto: UpdateTrackDto,
+  ): Promise<Track> {
+    return this.trackService.updateTrack(id, dto);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  deleteTrack(@Param('id') id: string) {
-    this.trackService.deleteTrack(id);
+  async deleteTrack(@Param('id') id: string): Promise<void> {
+    await this.trackService.deleteTrack(id);
   }
 }
