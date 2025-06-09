@@ -1,13 +1,24 @@
-import { Exclude } from 'class-transformer';
+import { Exclude, Expose } from 'class-transformer';
 import { User } from '../entities/user.entity';
 
-export class UserResponseDto implements Omit<User, 'password'> {
-  id: string;
-  login: string;
-  version: number;
-  createdAt: number;
-  updatedAt: number;
+@Exclude()
+export class UserResponseDto {
+  constructor(user: User) {
+    Object.assign(this, user);
+  }
 
-  @Exclude()
-  password: string;
+  @Expose()
+  id: string;
+
+  @Expose()
+  login: string;
+
+  @Expose()
+  version: number;
+
+  @Expose()
+  createdAt: number;
+
+  @Expose()
+  updatedAt: number;
 }

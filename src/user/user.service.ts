@@ -10,8 +10,9 @@ import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { v4 as uuidv4, validate as isUUID } from 'uuid';
 import { UpdatePasswordDto } from './dto/update-password.dto';
-import { plainToInstance } from 'class-transformer';
+// import { CreateUserDto } from './dto/create-user.dto';
 import { UserResponseDto } from './dto/user-response.dto';
+import { plainToInstance } from 'class-transformer';
 
 @Injectable()
 export class UserService {
@@ -22,9 +23,7 @@ export class UserService {
 
   async getAll(): Promise<UserResponseDto[]> {
     const users = await this.userRepository.find();
-    return users.map((u) =>
-      plainToInstance(UserResponseDto, u, { excludeExtraneousValues: true }),
-    );
+    return users.map((user) => new UserResponseDto(user));
   }
 
   async getById(id: string): Promise<UserResponseDto> {
@@ -64,9 +63,7 @@ export class UserService {
     });
 
     const saved = await this.userRepository.save(user);
-    return plainToInstance(UserResponseDto, saved, {
-      excludeExtraneousValues: true,
-    });
+    return new UserResponseDto(saved);
   }
 
   async updatePassword(
