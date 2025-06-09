@@ -10,7 +10,6 @@ import {
   Put,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import { UserResponseDto } from './dto/user-response.dto';
@@ -20,32 +19,34 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get()
-  getAllUsers() {
+  async getAllUsers(): Promise<UserResponseDto[]> {
     return this.userService.getAll();
   }
 
   @Get(':id')
-  getUser(@Param('id') id: string): User {
+  async getUser(@Param('id') id: string): Promise<UserResponseDto> {
     return this.userService.getById(id);
   }
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  create(@Body() { login, password }: CreateUserDto): UserResponseDto {
+  async create(
+    @Body() { login, password }: CreateUserDto,
+  ): Promise<UserResponseDto> {
     return this.userService.createUser(login, password);
   }
 
   @Put(':id')
-  updatePassword(
+  async updatePassword(
     @Param('id') id: string,
     @Body() updatePasswordDto: UpdatePasswordDto,
-  ): User {
+  ): Promise<UserResponseDto> {
     return this.userService.updatePassword(id, updatePasswordDto);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  deleteUser(@Param('id') id: string) {
-    this.userService.deleteUser(id);
+  async deleteUser(@Param('id') id: string): Promise<void> {
+    return this.userService.deleteUser(id);
   }
 }
