@@ -11,11 +11,11 @@ import {
 import { TrackService } from 'src/track/track.service';
 import { AlbumService } from 'src/album/album.service';
 import { ArtistService } from 'src/artist/artist.service';
-import { isValidUUID } from 'src/utils';
+import { validate } from 'uuid';
 
 @Injectable()
 export class FavoritesService {
-  private readonly SINGLE_ID = 'singleton-favs';
+  private readonly SINGLE_ID = '00000000-0000-0000-0000-000000000000';
 
   constructor(
     @InjectRepository(Favorites)
@@ -69,7 +69,7 @@ export class FavoritesService {
   }
 
   async addTrack(id: string) {
-    if (!isValidUUID(id)) throw new BadRequestException('Invalid track ID');
+    if (!validate(id)) throw new BadRequestException('Invalid track ID');
     await this.trackService.getTrackById(id);
     const fav = await this.getOrCreate();
     if (!fav.tracks.includes(id)) {
@@ -87,7 +87,7 @@ export class FavoritesService {
   }
 
   async addAlbum(id: string) {
-    if (!isValidUUID(id)) throw new BadRequestException('Invalid album ID');
+    if (!validate(id)) throw new BadRequestException('Invalid album ID');
     await this.albumService.getAlbumById(id);
     const fav = await this.getOrCreate();
     if (!fav.albums.includes(id)) {
@@ -105,7 +105,7 @@ export class FavoritesService {
   }
 
   async addArtist(id: string) {
-    if (!isValidUUID(id)) throw new BadRequestException('Invalid artist ID');
+    if (!validate(id)) throw new BadRequestException('Invalid artist ID');
     await this.artistService.getArtistById(id);
     const fav = await this.getOrCreate();
     if (!fav.artists.includes(id)) {

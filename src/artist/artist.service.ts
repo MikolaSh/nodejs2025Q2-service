@@ -12,7 +12,7 @@ import { UpdateArtistDto } from './dto/update-artist.dto';
 import { AlbumService } from 'src/album/album.service';
 import { TrackService } from 'src/track/track.service';
 import { FavoritesService } from 'src/favorites/favorites.service';
-import { isValidUUID } from 'src/utils';
+import { validate } from 'uuid';
 
 @Injectable()
 export class ArtistService {
@@ -32,7 +32,7 @@ export class ArtistService {
   }
 
   async getArtistById(id: string) {
-    if (!isValidUUID(id)) {
+    if (!validate(id)) {
       throw new BadRequestException('Invalid artist ID format');
     }
 

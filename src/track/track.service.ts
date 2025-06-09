@@ -9,7 +9,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UpdateTrackDto } from './dto/update-track.dto';
 import { FavoritesService } from 'src/favorites/favorites.service';
-import { isValidUUID } from 'src/utils';
+import { validate } from 'uuid';
 import { Track } from './entities/track.entety';
 
 @Injectable()
@@ -27,7 +27,7 @@ export class TrackService {
   }
 
   async getTrackById(id: string): Promise<Track> {
-    if (!isValidUUID(id)) {
+    if (!validate(id)) {
       throw new BadRequestException('Invalid track ID format');
     }
 

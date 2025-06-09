@@ -2,38 +2,35 @@ version: '3.9'
 
 services:
   postgres:
-    image: postgres:15-alpine
-    restart: always
-    container_name: postgres
-    ports:
-      - '5432:5432'
+    image: postgres:15
+    restart: unless-stopped
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: homelibrary
+      POSTGRES_DB: test_db
+    ports:
+      - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     networks:
-      - backend
+      - app-network
 
-  app:
+  nest-app:
     build: .
-    container_name: nest-app
-    restart: always
+    restart: unless-stopped
+    volumes:
+      - .:/app
+      - /app/node_modules
     ports:
-      - '4000:4000'
+      - "4000:3000"
     depends_on:
       - postgres
-    env_file:
-      - .env
     networks:
-      - backend
-    volumes:
-      - /app/node_modules
+      - app-network
 
 volumes:
-  pgdata:
+  pgdata: 
 
 networks:
-  backend:
+  app-network:
     driver: bridge

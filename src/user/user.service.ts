@@ -3,13 +3,12 @@ import {
   ConflictException,
   ForbiddenException,
   Injectable,
-  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
-import { v4 as uuidv4, validate as isUUID } from 'uuid';
+import { v4 as uuidv4, validate } from 'uuid';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import { UserResponseDto } from './dto/user-response.dto';
 import { plainToInstance } from 'class-transformer';
@@ -23,12 +22,7 @@ export class UserService {
 
   async getAll(): Promise<UserResponseDto[]> {
     const users = await this.userRepository.find();
-    Logger.log('Fetched users from DB:', JSON.stringify(users));
-
     const transformed = users.map((user) => new UserResponseDto(user));
-    Logger.log(`Запрос всех пользователей`, 'UserService');
-    Logger.log(JSON.stringify(users), 'UserService');
-    Logger.log('Transformed users:', JSON.stringify(transformed));
 
     return transformed;
   }
@@ -41,7 +35,7 @@ export class UserService {
   }
 
   private async findUserById(id: string): Promise<User> {
-    if (!isUUID(id)) {
+    if (!validate(id)) {
       throw new BadRequestException('Invalid user ID format');
     }
 
