@@ -9,6 +9,7 @@ import { FavoritesModule } from './favorites/favorites.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './user/entities/user.entity';
 import { Artist } from './artist/entities/artist.entity';
+import { Album } from './album/entities/album.entity';
 @Module({
   imports: [
     FavoritesModule,
@@ -23,7 +24,7 @@ import { Artist } from './artist/entities/artist.entity';
       username: process.env.POSTGRES_USER || 'postgres',
       password: process.env.POSTGRES_PASSWORD || 'postgres',
       database: process.env.POSTGRES_NAME || 'homelibrary',
-      entities: [User, Artist],
+      entities: [User, Artist, Album],
       synchronize: true,
     }),
   ],
