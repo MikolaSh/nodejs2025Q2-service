@@ -222,12 +222,22 @@ To start the app in docker, you need to install **docker** and **docker compose*
 To start the application and PostgreSQL database using Docker:
 
 ```bash
-docker-compose up --build
+docker compose build --no-cache
+docker compose up 
 ```
+
+To run test, run
+```bash
+npm run test
+```
+from the root with the active docker
+
+
 from the root directory of the app.
 
 If you want to reset the database:
 ```bash
-docker-compose down -v
-docker-compose up --build
+docker compose down -v
+docker compose build --no-cache
+docker compose up 
 ```
