@@ -8,6 +8,7 @@ import { TrackModule } from './track/track.module';
 import { FavoritesModule } from './favorites/favorites.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './user/entities/user.entity';
+import { Artist } from './artist/entities/artist.entity';
 @Module({
   imports: [
     FavoritesModule,
@@ -22,7 +23,7 @@ import { User } from './user/entities/user.entity';
       username: process.env.POSTGRES_USER || 'postgres',
       password: process.env.POSTGRES_PASSWORD || 'postgres',
       database: process.env.POSTGRES_NAME || 'homelibrary',
-      entities: [User],
+      entities: [User, Artist],
       synchronize: true,
     }),
   ],

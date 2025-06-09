@@ -28,35 +28,35 @@ export class FavoritesService {
   ) {}
 
   async getAll(): Promise<FavoritesResponse> {
-    const artists = this.favorites.artists
-      .map((id) => {
+    const artists = await Promise.all(
+      this.favorites.artists.map(async (id) => {
         try {
-          return this.artistService.getArtistById(id);
+          return await this.artistService.getArtistById(id);
         } catch {
           return null;
         }
-      })
-      .filter((artist) => artist !== null);
+      }),
+    ).then((res) => res.filter((artist) => artist !== null));
 
-    const albums = this.favorites.albums
-      .map((id) => {
+    const albums = await Promise.all(
+      this.favorites.albums.map(async (id) => {
         try {
-          return this.albumService.getAlbumById(id);
+          return await this.albumService.getAlbumById(id);
         } catch {
           return null;
         }
-      })
-      .filter((album) => album !== null);
+      }),
+    ).then((res) => res.filter((album) => album !== null));
 
-    const tracks = this.favorites.tracks
-      .map((id) => {
+    const tracks = await Promise.all(
+      this.favorites.tracks.map(async (id) => {
         try {
-          return this.trackService.getTrackById(id);
+          return await this.trackService.getTrackById(id);
         } catch {
           return null;
         }
-      })
-      .filter((track) => track !== null);
+      }),
+    ).then((res) => res.filter((track) => track !== null));
 
     return { artists, albums, tracks };
   }

@@ -11,7 +11,6 @@ import {
 } from '@nestjs/common';
 import { ArtistService } from './artist.service';
 import { CreateArtistDto } from './dto/create-artist.dto';
-import { Artist } from './entities/artist.entity';
 import { UpdateArtistDto } from './dto/update-artist.dto';
 
 @Controller('artist')
@@ -19,32 +18,32 @@ export class ArtistController {
   constructor(private readonly artistService: ArtistService) {}
 
   @Get()
-  getAllArtists() {
+  async getAllArtists() {
     return this.artistService.getAllArtists();
   }
 
   @Get(':id')
-  getArtist(@Param('id') id: string) {
+  async getArtist(@Param('id') id: string) {
     return this.artistService.getArtistById(id);
   }
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  create(@Body() { name, grammy }: CreateArtistDto): Artist {
+  async create(@Body() { name, grammy }: CreateArtistDto) {
     return this.artistService.createArtist(name, grammy);
   }
 
   @Put(':id')
-  updateUser(
+  async updateUser(
     @Param('id') id: string,
     @Body() updateArtistDto: UpdateArtistDto,
-  ): Artist {
+  ) {
     return this.artistService.updateArtist(id, updateArtistDto);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  deleteArtist(@Param('id') id: string) {
-    this.artistService.deleteArtist(id);
+  async deleteArtist(@Param('id') id: string) {
+    await this.artistService.deleteArtist(id);
   }
 }

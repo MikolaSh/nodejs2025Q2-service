@@ -89,9 +89,7 @@ export class UserService {
     user.updatedAt = Date.now();
 
     const updated = await this.userRepository.save(user);
-    return plainToInstance(UserResponseDto, updated, {
-      excludeExtraneousValues: true,
-    });
+    return new UserResponseDto(updated);
   }
 
   async deleteUser(id: string): Promise<void> {

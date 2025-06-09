@@ -1,21 +1,24 @@
-import { isValidUUID } from 'src/utils';
-import { Artist } from './entities/artist.entity';
 import {
-  BadRequestException,
-  forwardRef,
-  Inject,
   Injectable,
   NotFoundException,
+  BadRequestException,
+  Inject,
+  forwardRef,
 } from '@nestjs/common';
-import { v4 as uuidv4 } from 'uuid';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Artist } from './entities/artist.entity';
 import { UpdateArtistDto } from './dto/update-artist.dto';
 import { AlbumService } from 'src/album/album.service';
 import { TrackService } from 'src/track/track.service';
 import { FavoritesService } from 'src/favorites/favorites.service';
+import { isValidUUID } from 'src/utils';
 
 @Injectable()
 export class ArtistService {
   constructor(
+    @InjectRepository(Artist)
+    private readonly artistRepository: Repository<Artist>,
     @Inject(forwardRef(() => AlbumService))
     private readonly albumService: AlbumService,
     @Inject(forwardRef(() => TrackService))
@@ -24,76 +27,40 @@ export class ArtistService {
     private readonly favoritesService: FavoritesService,
   ) {}
 
-  private artists: Array<Artist> = [
-    {
-      id: 'b9387067-eef5-4c7a-9045-765286b3e52d',
-      name: 'Radiohead',
-      grammy: false,
-    },
-  ];
-
   getAllArtists() {
-    return this.artists;
+    return this.artistRepository.find();
   }
 
-  getArtistById(id: string) {
-    if (!isValidUUID(id)) {
-      throw new BadRequestException('Invalid user ID format');
-    }
-
-    const artist = this.artists.find((user) => user.id === id);
-
-    if (!artist) {
-      throw new NotFoundException('Artist not found');
-    }
-
-    return artist;
-  }
-
-  createArtist(name: string, grammy: boolean): Artist {
-    const newArtist = {
-      id: uuidv4(),
-      name,
-      grammy,
-    };
-
-    this.artists.push(newArtist);
-
-    return newArtist;
-  }
-
-  updateArtist(id: string, { name, grammy }: UpdateArtistDto) {
+  async getArtistById(id: string) {
     if (!isValidUUID(id)) {
       throw new BadRequestException('Invalid artist ID format');
     }
 
-    const artist = this.getArtistById(id);
-
+    const artist = await this.artistRepository.findOne({ where: { id } });
     if (!artist) {
       throw new NotFoundException('Artist not found');
     }
-
-    artist.name = name;
-    artist.grammy = grammy;
-
     return artist;
   }
 
-  deleteArtist(id: string) {
-    if (!isValidUUID(id)) {
-      throw new BadRequestException('Invalid artist ID format');
-    }
+  async createArtist(name: string, grammy: boolean): Promise<Artist> {
+    const artist = this.artistRepository.create({ name, grammy });
+    return this.artistRepository.save(artist);
+  }
 
-    const artistIndex = this.artists.findIndex((u) => u.id === id);
+  async updateArtist(id: string, updateDto: UpdateArtistDto): Promise<Artist> {
+    const artist = await this.getArtistById(id);
+    this.artistRepository.merge(artist, updateDto);
+    return this.artistRepository.save(artist);
+  }
 
-    if (artistIndex === -1) {
-      throw new NotFoundException('Artist not found');
-    }
+  async deleteArtist(id: string) {
+    const artist = await this.getArtistById(id);
 
-    this.albumService.removeArtistFromAlbums(id);
-    this.trackService.removeArtistFromTracks(id);
-    this.favoritesService.removeArtistFromFavorites(id);
+    await this.albumService.removeArtistFromAlbums(id);
+    await this.trackService.removeArtistFromTracks(id);
+    await this.favoritesService.removeArtistFromFavorites(id);
 
-    this.artists.splice(artistIndex, 1);
+    await this.artistRepository.remove(artist);
   }
 }
