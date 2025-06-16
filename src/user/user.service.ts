@@ -13,6 +13,8 @@ import { UpdatePasswordDto } from './dto/update-password.dto';
 import { UserResponseDto } from './dto/user-response.dto';
 import { plainToInstance } from 'class-transformer';
 
+import * as bcrypt from 'bcrypt';
+
 @Injectable()
 export class UserService {
   constructor(
@@ -53,11 +55,13 @@ export class UserService {
       throw new ConflictException('User already exists');
     }
 
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     const now = Date.now();
     const user = this.userRepository.create({
       id: uuidv4(),
       login,
-      password,
+      password: hashedPassword,
       version: 1,
       createdAt: now,
       updatedAt: now,

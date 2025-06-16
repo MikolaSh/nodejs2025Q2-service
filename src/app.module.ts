@@ -14,6 +14,7 @@ import { Track } from './track/entities/track.entety';
 import { Favorites } from './favorites/entities/favorites.entity';
 import { LoggingService } from './logging/logging.service';
 import { LoggingMiddleware } from './logging/logging.middleware';
+import { AuthModule } from './auth/auth.module';
 @Module({
   imports: [
     FavoritesModule,
@@ -21,6 +22,7 @@ import { LoggingMiddleware } from './logging/logging.middleware';
     ArtistModule,
     AlbumModule,
     TrackModule,
+    AuthModule,
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: process.env.POSTGRES_HOST || 'postgres',
