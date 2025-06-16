@@ -13,10 +13,14 @@ import { AlbumService } from './album.service';
 import { Album } from './entities/album.entity';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
+import { LoggingService } from 'src/logging/logging.service';
 
 @Controller('album')
 export class AlbumController {
-  constructor(private readonly albumService: AlbumService) {}
+  constructor(
+    private readonly albumService: AlbumService,
+    private readonly logger: LoggingService,
+  ) {}
 
   @Get()
   async getAllAlbums() {
