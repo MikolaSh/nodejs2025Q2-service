@@ -21,6 +21,7 @@ services:
     volumes:
       - .:/app
       - /app/node_modules
+      - app-logs:/app/logs 
     ports:
       - "4000:4000"
     depends_on:
@@ -36,6 +37,7 @@ services:
     volumes:
       - .:/app
       - /app/node_modules
+      - app-logs:/app/logs 
     command: npm run start:dev
     ports:
       - "4001:4000"
@@ -48,6 +50,7 @@ services:
 
 volumes:
   pgdata: 
+  app-logs:
 
 networks:
   app-network:
