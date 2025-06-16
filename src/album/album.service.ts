@@ -1,5 +1,6 @@
 import { Album } from './entities/album.entity';
 import {
+  BadRequestException,
   forwardRef,
   Inject,
   Injectable,
@@ -10,6 +11,7 @@ import { TrackService } from 'src/track/track.service';
 import { FavoritesService } from 'src/favorites/favorites.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { validate as isUUID } from 'uuid';
 
 @Injectable()
 export class AlbumService {
@@ -29,6 +31,10 @@ export class AlbumService {
   }
 
   async getAlbumById(id: string) {
+    if (!isUUID(id)) {
+      throw new BadRequestException('Invalid album ID');
+    }
+
     const album = await this.albumRepository.findOne({ where: { id } });
 
     if (!album) {
@@ -54,12 +60,20 @@ export class AlbumService {
   }
 
   async deleteAlbum(id: string) {
+    if (!isUUID(id)) {
+      throw new BadRequestException('Invalid album ID');
+    }
+
     const album = await this.getAlbumById(id);
 
-    await this.trackService.removeAlbumFromTracks(id);
-    this.favoritesService.removeAlbumFromFavorites(id);
+    if (!album) {
+      throw new NotFoundException('Album not found');
+    }
 
-    await this.albumRepository.remove(album);
+    await this.trackService.removeAlbumFromTracks(album.id);
+    await this.favoritesService.removeAlbumFromFavorites(album.id);
+
+    await this.albumRepository.delete(album.id);
   }
 
   async removeArtistFromAlbums(artistId: string) {

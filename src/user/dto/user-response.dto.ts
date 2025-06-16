@@ -5,6 +5,9 @@ import { User } from '../entities/user.entity';
 export class UserResponseDto {
   constructor(user: User) {
     Object.assign(this, user);
+
+    this.createdAt = Number(this.createdAt);
+    this.updatedAt = Number(this.updatedAt);
   }
 
   @Expose()

@@ -1,6 +1,5 @@
 import {
   BadRequestException,
-  ConflictException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -65,7 +64,7 @@ export class UserService {
   async createUser(login: string, password: string): Promise<UserResponseDto> {
     const existing = await this.userRepository.findOne({ where: { login } });
     if (existing) {
-      throw new ConflictException('User already exists');
+      return new UserResponseDto(existing);
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -90,11 +89,12 @@ export class UserService {
   ): Promise<UserResponseDto> {
     const user = await this.findUserById(id);
 
-    if (user.password !== oldPassword) {
+    const isMatch = await bcrypt.compare(oldPassword, user.password);
+    if (!isMatch) {
       throw new ForbiddenException('Old password is incorrect');
     }
 
-    user.password = newPassword;
+    user.password = await bcrypt.hash(newPassword, 10);
     user.version += 1;
     user.updatedAt = Date.now();
 
@@ -103,7 +103,12 @@ export class UserService {
   }
 
   async deleteUser(id: string): Promise<void> {
+    if (!validate(id)) {
+      throw new BadRequestException('Invalid user ID format');
+    }
+
     const result = await this.userRepository.delete(id);
+
     if (result.affected === 0) {
       throw new NotFoundException('User not found');
     }

@@ -10,7 +10,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './user/entities/user.entity';
 import { Artist } from './artist/entities/artist.entity';
 import { Album } from './album/entities/album.entity';
-import { Track } from './track/entities/track.entety';
+import { Track } from './track/entities/track.entity';
 import { Favorites } from './favorites/entities/favorites.entity';
 import { LoggingService } from './logging/logging.service';
 import { LoggingMiddleware } from './logging/logging.middleware';

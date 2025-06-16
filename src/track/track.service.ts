@@ -10,7 +10,7 @@ import { Repository } from 'typeorm';
 import { UpdateTrackDto } from './dto/update-track.dto';
 import { FavoritesService } from 'src/favorites/favorites.service';
 import { validate } from 'uuid';
-import { Track } from './entities/track.entety';
+import { Track } from './entities/track.entity';
 
 @Injectable()
 export class TrackService {

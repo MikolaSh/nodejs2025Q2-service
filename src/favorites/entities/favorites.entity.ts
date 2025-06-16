@@ -1,6 +1,6 @@
 import { Album } from 'src/album/entities/album.entity';
 import { Artist } from 'src/artist/entities/artist.entity';
-import { Track } from 'src/track/entities/track.entety';
+import { Track } from 'src/track/entities/track.entity';
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
 export interface FavoritesResponse {

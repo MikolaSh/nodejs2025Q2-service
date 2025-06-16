@@ -41,12 +41,12 @@ export class UserController {
     @Param('id') id: string,
     @Body() updatePasswordDto: UpdatePasswordDto,
   ): Promise<UserResponseDto> {
-    return this.userService.updatePassword(id, updatePasswordDto);
+    return await this.userService.updatePassword(id, updatePasswordDto);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteUser(@Param('id') id: string): Promise<void> {
-    return this.userService.deleteUser(id);
+    return await this.userService.deleteUser(id);
   }
 }
