@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ForbiddenException,
   Injectable,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { CreateUserDto } from 'src/user/dto/create-user.dto';
 import { UserResponseDto } from 'src/user/dto/user-response.dto';
@@ -56,6 +57,52 @@ export class AuthService {
     };
   }
 
+  async refreshToken(
+    refreshToken: string,
+  ): Promise<{ accessToken: string; refreshToken: string }> {
+    if (!refreshToken) {
+      throw new UnauthorizedException('No refresh token provided');
+    }
+
+    const [headerB64, payloadB64, signature] = refreshToken.split('.');
+    if (!headerB64 || !payloadB64 || !signature) {
+      throw new ForbiddenException('Invalid refresh token format');
+    }
+
+    const valid = this.verifyToken(refreshToken, this.REFRESH_SECRET);
+    if (!valid) {
+      throw new ForbiddenException('Invalid or expired refresh token');
+    }
+
+    const payloadRaw = Buffer.from(payloadB64, 'base64').toString('utf-8');
+    const payload = JSON.parse(payloadRaw);
+
+    const now = Math.floor(Date.now() / 1000);
+    if (payload.exp < now) {
+      throw new ForbiddenException('Refresh token expired');
+    }
+
+    const user = await this.userService.getById(payload.userId);
+    if (!user) {
+      throw new ForbiddenException('User not found');
+    }
+
+    const newPayload = { userId: user.id, login: user.login };
+
+    return {
+      accessToken: this.signToken(
+        newPayload,
+        this.ACCESS_SECRET,
+        this.TOKEN_EXPIRE_TIME,
+      ),
+      refreshToken: this.signToken(
+        newPayload,
+        this.REFRESH_SECRET,
+        this.TOKEN_REFRESH_EXPIRE_TIME,
+      ),
+    };
+  }
+
   private signToken(
     payload: object,
     secret: string,
@@ -83,6 +130,20 @@ export class AuthService {
       .replace(/\//g, '_');
 
     return `${base64Header}.${base64Payload}.${signature}`;
+  }
+
+  private verifyToken(token: string, secret: string): boolean {
+    const [header, payload, signature] = token.split('.');
+    if (!header || !payload || !signature) return false;
+
+    const expectedSignature = createHmac('sha256', secret)
+      .update(`${header}.${payload}`)
+      .digest('base64')
+      .replace(/=/g, '')
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_');
+
+    return signature === expectedSignature;
   }
 
   parseExpireTime(envExpire: string): number {
