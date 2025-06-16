@@ -16,9 +16,10 @@ export class AuthService {
   private ACCESS_SECRET = process.env.JWT_SECRET_KEY || 'access-secret';
   private REFRESH_SECRET =
     process.env.JWT_SECRET_REFRESH_KEY || 'refresh-secret';
-  private TOKEN_EXPIRE_TIME = parseInt(process.env.TOKEN_EXPIRE_TIME) || 60;
+  private TOKEN_EXPIRE_TIME =
+    this.parseExpireTime(process.env.TOKEN_EXPIRE_TIME) || 60 * 60;
   private TOKEN_REFRESH_EXPIRE_TIME =
-    parseInt(process.env.TOKEN_REFRESH_EXPIRE_TIME) || 60 * 60 * 24;
+    this.parseExpireTime(process.env.TOKEN_REFRESH_EXPIRE_TIME) || 60 * 60 * 24;
   constructor(private readonly userService: UserService) {}
 
   async singup(dto: CreateUserDto): Promise<UserResponseDto> {
@@ -82,5 +83,35 @@ export class AuthService {
       .replace(/\//g, '_');
 
     return `${base64Header}.${base64Payload}.${signature}`;
+  }
+
+  parseExpireTime(envExpire: string): number {
+    const nowInSeconds = Math.floor(Date.now() / 1000);
+
+    const match = envExpire.match(/^(\d+)([smhd])$/);
+    if (!match) throw new Error('Invalid TOKEN_EXPIRE_TIME format');
+
+    const value = parseInt(match[1]);
+    const unit = match[2];
+
+    let seconds = 0;
+    switch (unit) {
+      case 's':
+        seconds = value;
+        break;
+      case 'm':
+        seconds = value * 60;
+        break;
+      case 'h':
+        seconds = value * 60 * 60;
+        break;
+      case 'd':
+        seconds = value * 60 * 60 * 24;
+        break;
+      default:
+        throw new Error('Unsupported time unit in TOKEN_EXPIRE_TIME');
+    }
+
+    return nowInSeconds + seconds;
   }
 }

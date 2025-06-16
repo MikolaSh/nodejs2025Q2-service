@@ -15,6 +15,9 @@ import { Favorites } from './favorites/entities/favorites.entity';
 import { LoggingService } from './logging/logging.service';
 import { LoggingMiddleware } from './logging/logging.middleware';
 import { AuthModule } from './auth/auth.module';
+import { JwtAuthGuard } from './auth/jwt-auth.guard';
+import { APP_GUARD } from '@nestjs/core';
+import { GlobalAuthGuard } from './auth/global-auth.guard';
 @Module({
   imports: [
     FavoritesModule,
@@ -35,7 +38,15 @@ import { AuthModule } from './auth/auth.module';
     }),
   ],
   controllers: [AppController],
-  providers: [AppService, LoggingService],
+  providers: [
+    AppService,
+    LoggingService,
+    JwtAuthGuard,
+    {
+      provide: APP_GUARD,
+      useClass: GlobalAuthGuard,
+    },
+  ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
