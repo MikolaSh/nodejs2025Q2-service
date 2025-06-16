@@ -36,6 +36,19 @@ export class UserService {
     });
   }
 
+  async getUserByLogin(login: string): Promise<User> {
+    if (!login) {
+      throw new BadRequestException('Invalid login');
+    }
+
+    const user = await this.userRepository.findOne({ where: { login } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return user;
+  }
+
   private async findUserById(id: string): Promise<User> {
     if (!validate(id)) {
       throw new BadRequestException('Invalid user ID format');
